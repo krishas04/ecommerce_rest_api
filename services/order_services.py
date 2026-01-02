@@ -3,64 +3,57 @@ from models.user import User
 from models.cart import CartItem
 from models.product import Product
 from models.order import Order, OrderItem
+import uuid
 
 class OrderService:
-    
     @staticmethod
-    def place_order(email):
-        user=User.query.filter_by(email=email).first()
+    def place_order(email: str):
+        # 1. Find the user
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            raise ValueError("User not found.")
+
+        # 2. Get all cart items for this user
         cart_items = CartItem.query.filter_by(user_id=user.id).all()
         if not cart_items:
-            raise ValueError("Cart is empty")
+            raise ValueError("Cart is empty.")
 
-        total_price = 0
-        order_items_to_create = []
+        # 3. Validate stock
+        for item in cart_items:
+            if item.quantity > item.product.stock:
+                raise ValueError(f"Not enough stock for {item.product.name}.")
 
-        try:
-            # 1. Validate all items and calculate total
-            for item in cart_items:
-                product = item.product # Relationship from model
-                
-                if product.stock < item.quantity:
-                    raise ValueError(f"Insufficient stock for {product.name}")
+        # 4. Create the order
+        order = Order(
+            id=str(uuid.uuid4()),   # UUID for order ID
+            user_id=user.id,
+            total_price=0.0
+        )
+        db.session.add(order)
 
-                # Update stock
-                product.stock -= item.quantity
-                
-                # Calculate price
-                item_total = product.price * item.quantity
-                total_price += item_total
+        total_price = 0.0
 
-                # Prepare OrderItem record (snapshot current price)
-                order_item = OrderItem(
-                    product_id=product.id,
-                    quantity=item.quantity,
-                    price_at_purchase=product.price
-                )
-                order_items_to_create.append(order_item)
+        # 5. Create order items and update stock
+        for item in cart_items:
+            subtotal = item.quantity * item.product.price
+            total_price += subtotal
 
-            # 2. Create the main Order record
-            new_order = Order(user_id=user.id, total_price=total_price)
-            db.session.add(new_order)
-            db.session.flush() # Gets the order.id before committing
+            order_item = OrderItem(
+                order_id=order.id,
+                product_id=item.product_id,
+                quantity=item.quantity,
+                price_at_purchase=item.product.price
+            )
+            db.session.add(order_item)
 
-            # 3. Link items to order and add to session
-            for oi in order_items_to_create:
-                oi.order_id = new_order.id
-                db.session.add(oi)
+            # Reduce product stock
+            item.product.stock -= item.quantity
 
-            # 4. Clear the cart
-            CartItem.query.filter_by(user_id=user.id).delete()
+            # Remove item from cart
+            db.session.delete(item)
 
-            # 5. Commit everything to the database
-            db.session.commit()
+        # 6. Update order total and commit
+        order.total_price = round(total_price, 2)
+        db.session.commit()
 
-            return {
-                "order_id": new_order.id,
-                "total": total_price,
-                "status": "Success"
-            }
-
-        except Exception as e:
-            db.session.rollback() # Undo everything if any error occurs
-            raise e
+        return order

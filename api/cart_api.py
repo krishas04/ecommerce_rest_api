@@ -1,14 +1,16 @@
 from flask import Blueprint, request, jsonify, g
 from services.cart_services import CartService
 from middleware.auth_middleware import token_required
+from schemas.cart_schema import cart_items_schema
 
 cart_bp = Blueprint('cart', __name__)
 
 @cart_bp.route('', methods=['GET'])
 @token_required
 def get_cart():
+    items=CartService.get_cart(g.user_email)
     # Email comes from the token, not the URL or body
-    return jsonify(CartService.get_cart(g.user_email)), 200
+    return jsonify(cart_items_schema.dump(items)), 200
 
 @cart_bp.route('', methods=['POST'])
 @token_required

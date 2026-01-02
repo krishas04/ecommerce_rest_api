@@ -1,10 +1,12 @@
 from flask import Flask
 from config import Config
-from extensions import db, migrate
+from extensions import db, migrate, ma
+import models
 from api.auth_api import auth_bp
 from api.product_api import product_bp
 from api.cart_api import cart_bp
 from api.order_api import order_bp
+
 
 def create_app():
     app = Flask(__name__)
@@ -12,6 +14,7 @@ def create_app():
 
     db.init_app(app)  # Connects SQLAlchemy to this app instance.
     migrate.init_app(app, db) # Connects Flask-Migrate to handle schema migrations.
+    ma.init_app(app)
 
     # temporarily activates the app so Flask knows which application, config, and database to use when running code outside a request.
     with app.app_context(): #

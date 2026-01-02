@@ -37,13 +37,7 @@ class CartService:
         user = User.query.filter_by(email=email).first()
         items = CartItem.query.filter_by(user_id=user.id).all()
         
-        return [{
-            "product_id": item.product_id,
-            "name": item.product.name,
-            "price": item.product.price,
-            "quantity": item.quantity,
-            "subtotal": item.product.price * item.quantity
-        } for item in items]
+        return items
 
     @staticmethod
     def clear_cart(email):
