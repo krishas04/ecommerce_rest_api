@@ -35,14 +35,16 @@ class OrderService:
 
         # 5. Create order items and update stock
         for item in cart_items:
-            subtotal = item.quantity * item.product.price
+            current_price=item.product.get_current_price()
+            subtotal = item.quantity * current_price
             total_price += subtotal
 
             order_item = OrderItem(
                 order_id=order.id,
                 product_id=item.product_id,
                 quantity=item.quantity,
-                price_at_purchase=item.product.price
+                rate=current_price,
+                price_at_purchase=item.quantity * current_price
             )
             db.session.add(order_item)
 

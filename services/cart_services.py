@@ -29,7 +29,7 @@ class CartService:
             db.session.add(item)
 
         db.session.commit()
-        return {"message": "Cart updated"}
+        return {"message": "Added to cart"}
 
 
     @staticmethod

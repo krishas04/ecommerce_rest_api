@@ -6,6 +6,8 @@ from api.auth_api import auth_bp
 from api.product_api import product_bp
 from api.cart_api import cart_bp
 from api.order_api import order_bp
+from api.offer_api import offer_bp
+from api.category_api import category_bp
 
 
 def create_app():
@@ -25,6 +27,8 @@ def create_app():
     app.register_blueprint(product_bp, url_prefix='/products')
     app.register_blueprint(cart_bp, url_prefix='/cart')
     app.register_blueprint(order_bp, url_prefix='/orders')
+    app.register_blueprint(category_bp, url_prefix='/categories')
+    app.register_blueprint(offer_bp, url_prefix='/offers')
 
     return app
 

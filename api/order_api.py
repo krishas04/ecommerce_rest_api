@@ -23,27 +23,20 @@ def create_order():
         }), 201
 
     except ValueError as e:
-        # Standard REST: 400 Bad Request for business logic errors 
-        # (e.g., empty cart or out of stock)
         return jsonify({
             "status": "error",
             "message": str(e)
         }), 400
     
     except Exception as e:
-        # Standard REST: 500 Internal Server Error for unexpected crashes
         current_app.logger.error(f"Order placement failed: {e}")
         return jsonify({
             "status": "error",
-            "message": "An unexpected error occurred."
+            "message": "Internal error"
         }), 500
 
 @order_bp.route('', methods=['GET'])
 @token_required
 def get_my_orders():
-    """
-    REST Endpoint: GET /orders
-    Action: Retrieves all orders for the logged-in user.
-    """
     user_orders = OrderService.get_user_orders(g.user_email)
     return jsonify(order_schema.dump(user_orders)), 200

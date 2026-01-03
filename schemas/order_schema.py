@@ -7,7 +7,6 @@ class OrderItemSchema(ma.SQLAlchemyAutoSchema):
         model = OrderItem
         load_instance = True
     
-   
     id = fields.Int(dump_only=True)
 
 class OrderSchema(ma.SQLAlchemyAutoSchema):

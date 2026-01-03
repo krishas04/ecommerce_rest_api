@@ -25,6 +25,7 @@ class OrderItem(db.Model):
     order_id: Mapped[str] = mapped_column(ForeignKey('order.id'), nullable=False)
     product_id: Mapped[str] = mapped_column(nullable=False)
     quantity: Mapped[int] = mapped_column(nullable=False)
+    rate: Mapped[float] = mapped_column(nullable=False)
     price_at_purchase: Mapped[float] = mapped_column(nullable=False)
     
     order: Mapped["Order"] = relationship(back_populates="items")
