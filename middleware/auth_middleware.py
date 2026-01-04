@@ -10,7 +10,7 @@ def token_required(f):
       return jsonify({"error":"Token is missing."}),401
     
     try:
-      token=token.replace("Bearer","")
+      token=token.replace("Bearer ","")
       data=jwt.decode(token,current_app.config["SECRET_KEY"],algorithms="HS256")
       g.user_email=data["user"]
     except jwt.ExpiredSignatureError:

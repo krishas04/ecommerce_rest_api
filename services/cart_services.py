@@ -44,3 +44,64 @@ class CartService:
         user = User.query.filter_by(email=email).first()
         CartItem.query.filter_by(user_id=user.id).delete()
         db.session.commit()
+
+    @staticmethod
+    def get_cart_item(email, item_id):
+        """
+        Get specific cart item for user
+        Returns: CartItem object or None
+        """
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return None
+        
+        item = CartItem.query.filter_by(
+            id=item_id, 
+            user_id=user.id
+        ).first()
+        
+        return item
+    
+    @staticmethod
+    def update_cart_item(email, item_id, quantity):
+        """
+        Update quantity of cart item
+        Returns: Updated CartItem object or None
+        """
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return None
+        
+        item = CartItem.query.filter_by(
+            id=item_id, 
+            user_id=user.id
+        ).first()
+        
+        if item:
+            # Check stock
+            if item.product.stock < quantity:
+                raise ValueError("Not enough stock available.")
+            
+            item.quantity = quantity
+            db.session.commit()
+        
+        return item
+    
+    @staticmethod
+    def remove_from_cart(email, item_id):
+        """
+        Remove specific item from user's cart
+        Returns: None
+        """
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return
+        
+        item = CartItem.query.filter_by(
+            id=item_id, 
+            user_id=user.id
+        ).first()
+        
+        if item:
+            db.session.delete(item)
+            db.session.commit()

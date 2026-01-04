@@ -70,3 +70,22 @@ class OrderService:
         # This returns the list of Order objects tied to this user
         return user.orders
     
+    @staticmethod
+    def get_by_id(id):
+        """
+        Get single order by ID
+        Returns: Order object or None
+        """
+        return Order.query.get(id)
+    
+    @staticmethod
+    def get_order_items(order_id):
+        """
+        Get all items in an order
+        Returns: List of OrderItem objects
+        """
+        order = Order.query.get(order_id)
+        if order:
+            return order.items
+        return []
+    
