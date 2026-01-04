@@ -39,4 +39,4 @@ def create_order():
 @token_required
 def get_my_orders():
     user_orders = OrderService.get_user_orders(g.user_email)
-    return jsonify(order_schema.dump(user_orders)), 200
+    return jsonify(orders_schema.dump(user_orders)), 200

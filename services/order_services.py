@@ -59,3 +59,14 @@ class OrderService:
         db.session.commit()
 
         return order
+    
+    @staticmethod
+    def get_user_orders(email:str):
+        """Retrieves all orders associated with a specific user email."""
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return []
+        
+        # This returns the list of Order objects tied to this user
+        return user.orders
+    

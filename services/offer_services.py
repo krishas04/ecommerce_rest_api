@@ -25,3 +25,7 @@ class OfferService:
         db.session.add(new_offer)
         db.session.commit()
         return new_offer
+    
+    @staticmethod
+    def get_all_offers():
+        return Offer.query.all()

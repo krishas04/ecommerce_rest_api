@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from services.offer_services import OfferService
-from schemas.offer_schema import offer_schema
+from schemas.offer_schema import offer_schema, offers_schema
 from middleware.auth_middleware import token_required
 
 offer_bp = Blueprint('offers', __name__)
@@ -23,3 +23,8 @@ def add_offer():
         return jsonify(offer_schema.dump(offer)), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+    
+@offer_bp.route('', methods=['GET'])
+def list_offers():
+    all_offers=OfferService.get_all_offers()
+    return jsonify(offers_schema.dump(all_offers))
