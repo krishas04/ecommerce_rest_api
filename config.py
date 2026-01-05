@@ -11,3 +11,7 @@ class Config:
     
     # Recommended: Disable overhead of tracking modifications
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    UPLOAD_FOLDER = os.path.join('static', 'uploads', 'gallery')
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    

@@ -1,3 +1,4 @@
+import traceback
 from flask.views import MethodView
 from flask import jsonify, request
 from datetime import datetime, timezone
@@ -9,49 +10,71 @@ from views.base_api import BaseAPI
 
 
 class ProductListAPI(BaseAPI):
-    """ Handle product collection endpoint"""
+    # Handle product collection endpoint
     def get(self):
-        """GET /products - List all products"""
+        # GET /products - List all products
         try:
             # Get all products from service
-            products = ProductService.lists_products()
+            products = ProductService.list_products()
             
             # Serialize using schema
             return jsonify(products_schema.dump(products)), 200
             
         except Exception as e:
-            return self.error_response(str(e), 500)
+            return self.error_response("Invalid server error", 500)
     
     @token_required
     def post(self):
-        """POST /products - Create new product (requires auth)"""
+        # POST /products - Create new product (requires auth)
         try:
-            # Validate and load data
-            data = product_schema.load(request.get_json())
+            images=None
+
+            # for multipart request
+            if request.content_type.startswith("multipart/form-data"):
+                data=product_schema.load(request.form)
+                images=request.files.getlist("images")
+
+                result=ProductService.add_product(
+                    data.id,
+                    data.name,
+                    data.price,
+                    data.stock,
+                    data.category_id,
+                    images=images
+                )
+                return self.success_response(result,201)
+            # for json request
+            elif request.is_json:
+                # Validate and load data
+                data = product_schema.load(request.get_json())
+                
+                # Create product in database
+                result = ProductService.add_product(
+                    data.id,
+                    data.name,
+                    data.price,
+                    data.stock,
+                    data.category_id,
+                    images=None
+                )
+                
+                # Return 201 Created
+                return self.success_response(result,201)
             
-            # Create product in database
-            result = ProductService.add_product(
-                data.id, 
-                data.name, 
-                data.price, 
-                data.stock, 
-                data.category_id
-            )
-            
-            # Return 201 Created
-            return jsonify(result), 201
+            else:
+                return self.error_response("Response must be json or multipart data",400)
             
         except ValidationError as e:
-            return jsonify(e.messages), 400
+            return self.error_response(str(e),400)
         except Exception as e:
-            return self.error_response(str(e))
-
+            tb = traceback.format_exc()  # get full traceback
+            return self.error_response(f"Internal Server Error:\n{tb}", 500)
 
 class ProductDetailAPI(BaseAPI):
-    """Handle single product endpoint """
+    # Handle single product endpoint 
     
     def get(self, product_id):
-        """GET /products/<id> - Get single product"""
+        # GET /products/<id> - Get single product
         try:
             # Get product by ID
             product = ProductService.get_product(product_id)
@@ -61,11 +84,11 @@ class ProductDetailAPI(BaseAPI):
             return jsonify(product_schema.dump(product)), 200
             
         except Exception as e:
-            return self.error_response(str(e), 500)
+            return self.error_response("Internal server error", 500)
     
     @token_required
     def patch(self, product_id):
-        """PATCH /products/<id> - Update product"""
+        # PATCH /products/<id> - Update product
         try:
             # Check if product exists
             product = ProductService.get_product(product_id)
@@ -81,13 +104,13 @@ class ProductDetailAPI(BaseAPI):
             return jsonify(product_schema.dump(updated)), 200
             
         except ValidationError as e:
-            return jsonify(e.messages), 400
-        except Exception as e:
             return self.error_response(str(e))
+        except Exception as e:
+            return self.error_response("Internal server error",500)
     
     @token_required
     def delete(self, product_id):
-        """DELETE /products/<id> - Delete product"""
+        # DELETE /products/<id> - Delete product
         try:
             product = ProductService.get_product(product_id)
             if not product:
@@ -100,5 +123,5 @@ class ProductDetailAPI(BaseAPI):
             return "", 204
             
         except Exception as e:
-            return self.error_response(str(e))
+            return self.error_response("Internal server error",500)
 

@@ -8,6 +8,7 @@ from api.cart_api import cart_bp
 from api.order_api import order_bp
 from api.offer_api import offer_bp
 from api.category_api import category_bp
+from api.gallery_api import gallery_bp
 
 
 def create_app():
@@ -17,6 +18,7 @@ def create_app():
     db.init_app(app)  # Connects SQLAlchemy to this app instance.
     migrate.init_app(app, db) # Connects Flask-Migrate to handle schema migrations.
     ma.init_app(app)
+    
 
     # temporarily activates the app so Flask knows which application, config, and database to use when running code outside a request.
     with app.app_context(): #
@@ -29,6 +31,7 @@ def create_app():
     app.register_blueprint(order_bp, url_prefix='/orders')
     app.register_blueprint(category_bp, url_prefix='/categories')
     app.register_blueprint(offer_bp, url_prefix='/offers')
+    app.register_blueprint(gallery_bp)
 
     return app
 
