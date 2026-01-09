@@ -7,13 +7,10 @@ from views.base_api import BaseAPI
 
 
 class OrderListAPI(BaseAPI):
-    """Handle order collection endpoint"""
     
     @token_required
     def get(self):
-        """GET /orders - Get logged-in user's orders"""
         try:
-            # Get all orders for authenticated user
             user_orders = OrderService.get_user_orders(g.user_email)
             
             return jsonify(orders_schema.dump(user_orders)), 200
@@ -24,12 +21,9 @@ class OrderListAPI(BaseAPI):
     
     @token_required
     def post(self):
-        """POST /orders - Place order from user's cart"""
         try:
-            # Place order for authenticated user
             new_order = OrderService.place_order(g.user_email)
             
-            # Return 201 Created with order details
             return jsonify({
                 "status": "success",
                 "message": "Order placed successfully",
@@ -37,13 +31,11 @@ class OrderListAPI(BaseAPI):
             }), 201
             
         except ValueError as e:
-            # Business logic error (empty cart, out of stock, etc)
             return jsonify({
                 "status": "error",
                 "message": str(e)
             }), 400
         except Exception as e:
-            # Unexpected error
             current_app.logger.error(f"Order placement failed: {e}")
             return jsonify({
                 "status": "error",
@@ -52,11 +44,9 @@ class OrderListAPI(BaseAPI):
 
 
 class OrderDetailAPI(BaseAPI):
-    """Handle single order endpoint """
     
     @token_required
     def get(self, id):
-        """GET /orders/<id> - Get order details"""
         try:
             # Get order by ID
             order = OrderService.get_by_id(id)

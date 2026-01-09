@@ -6,25 +6,17 @@ from middleware.auth_middleware import token_required
 from views.base_api import BaseAPI
 from marshmallow import ValidationError
 
-# Class 1: Handle /categories (collection)
 class CategoryListAPI(BaseAPI):
-    """
-    Maps to:
-    - GET /categories
-    - POST /categories
-    """
     
     def get(self):
-        """GET /categories - List all categories"""
         try:
             categories = CategoryService.get_all()
             return jsonify(categories_schema.dump(categories)), 200
         except Exception as e:
             return self.error_response(str(e), 500)
     
-    @token_required  # Decorator works on class methods!
+    @token_required  
     def post(self):
-        """POST /categories - Create new category"""
         try:
             data = category_schema.load(request.get_json())
             new_category = CategoryService.add_category(data.name)
@@ -35,17 +27,8 @@ class CategoryListAPI(BaseAPI):
             return self.error_response(str(e))
 
 
-# Class 2: Handle /categories/<id> (single item)
 class CategoryDetailAPI(BaseAPI):
-    """
-    Maps to:
-    - GET /categories/<id>
-    - PATCH /categories/<id>
-    - DELETE /categories/<id>
-    """
-    
     def get(self, id):
-        """GET /categories/<id> - Get single category"""
         try:
             category = CategoryService.get_by_id(id)
             if not category:
@@ -56,7 +39,6 @@ class CategoryDetailAPI(BaseAPI):
     
     @token_required
     def patch(self, id):
-        """PATCH /categories/<id> - Update category"""
         try:
             category = CategoryService.get_by_id(id)
             if not category:
@@ -70,7 +52,6 @@ class CategoryDetailAPI(BaseAPI):
     
     @token_required
     def delete(self, id):
-        """DELETE /categories/<id> - Delete category"""
         try:
             category = CategoryService.get_by_id(id)
             if not category:

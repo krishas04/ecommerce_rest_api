@@ -8,10 +8,8 @@ from views.base_api import BaseAPI
 
 
 class OfferListAPI(BaseAPI):
-    """Handle offer collection endpoint"""
     
     def get(self):
-        """GET /offers - List all offers"""
         try:
             # Get all offers from service
             offers = OfferService.get_all_offers()
@@ -23,15 +21,11 @@ class OfferListAPI(BaseAPI):
     
     @token_required
     def post(self):
-        """POST /offers - Create new offer (requires auth)"""
         try:
-            # Validate and load offer data (excluding category_ids)
             data = offer_schema.load(request.get_json())
             
-            # Get category_ids from raw JSON (it's load_only field)
             category_ids = request.get_json().get('category_ids')
             
-            # Create offer with category relationships
             offer = OfferService.create_offer(
                 name=data.name,
                 discount=data.discount_percentage,
@@ -49,10 +43,8 @@ class OfferListAPI(BaseAPI):
 
 
 class OfferDetailAPI(BaseAPI):
-    """Handle single offer endpoint"""
     
     def get(self, id):
-        """GET /offers/<id> - Get single offer"""
         try:
             # Get offer by ID
             offer = OfferService.get_by_id(id)
@@ -66,7 +58,6 @@ class OfferDetailAPI(BaseAPI):
     
     @token_required
     def patch(self, id):
-        """PATCH /offers/<id> - Update offer"""
         try:
             # Check if offer exists
             offer = OfferService.get_by_id(id)
@@ -88,7 +79,6 @@ class OfferDetailAPI(BaseAPI):
     
     @token_required
     def delete(self, id):
-        """DELETE /offers/<id> - Delete offer"""
         try:
             offer = OfferService.get_by_id(id)
             if not offer:

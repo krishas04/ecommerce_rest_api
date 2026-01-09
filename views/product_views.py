@@ -10,14 +10,10 @@ from views.base_api import BaseAPI
 
 
 class ProductListAPI(BaseAPI):
-    # Handle product collection endpoint
     def get(self):
-        # GET /products - List all products
         try:
-            # Get all products from service
             products = ProductService.list_products()
             
-            # Serialize using schema
             return jsonify(products_schema.dump(products)), 200
             
         except Exception as e:
@@ -25,7 +21,6 @@ class ProductListAPI(BaseAPI):
     
     @token_required
     def post(self):
-        # POST /products - Create new product (requires auth)
         try:
             images=None
 
